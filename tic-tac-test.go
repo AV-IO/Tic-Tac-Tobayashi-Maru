@@ -162,7 +162,9 @@ func game(w http.ResponseWriter, r *http.Request) {
 		b.OCount = strings.Count(b.Board, "O")
 		// Check if cheating is detected
 		if isCheating(b) {
-			// Write cheating response to w
+			// TODO Change template to static html
+			t, _ := template.ParseFiles("xischeating.gtpl")
+			t.Execute(w, b)
 			return
 		}
 		fmt.Println("Beginning Round: ", b.Round)
@@ -174,21 +176,6 @@ func game(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, b)
 }
 
-func xischeating(w http.ResponseWriter, r *http.Request) {
-	b := GameBoard{
-		Board:         "---------",
-		Round:         0,
-		XCount:        0,
-		OCount:        0,
-		playerVictory: false,
-		serverVictory: false,
-		isCheating:    false,
-	}
-	t, _ := template.ParseFiles("xischeating.gtpl")
-	t.Execute(w, b)
-	// ToDo: Change template to static htlm file
-}
-
 func main() {
 	//b := "---------"
 	//r := 0
@@ -196,7 +183,6 @@ func main() {
 	//var playerVictory, serverVictory bool
 
 	http.HandleFunc("/game", game)
-	http.HandleFunc("/xischeating", xischeating)
 
 	err := http.ListenAndServe(":9090", nil) // setting listening port
 	if err != nil {
