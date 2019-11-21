@@ -142,8 +142,12 @@ func game(w http.ResponseWriter, r *http.Request) {
 		b.Round = 0
 		ticTacTest(w, r, &b)
 	case "POST":
+		// Populate board
 		r.ParseForm()
 		b.Board = r.Form.Get("String")
+		b.XCount = strings.Count(b.Board, "X")
+		b.OCount = strings.Count(b.Board, "O")
+		// Getting cookie value
 		cookie, _ := r.Cookie("Round")
 		if cookie.Value == "One" {
 			b.Round = 1
@@ -158,22 +162,18 @@ func game(w http.ResponseWriter, r *http.Request) {
 			cookie.Value = "Four"
 			http.SetCookie(w, cookie)
 		}
-		b.XCount = strings.Count(b.Board, "X")
-		b.OCount = strings.Count(b.Board, "O")
-		// Check if cheating is detected
-		if isCheating(b) {
-			// TODO Change template to static html
-			t, _ := template.ParseFiles("xischeating.gtpl")
+		switch {
+		case isCheating(b), boardCheck(b):
+			t, _ = template.ParseFiles("xischeating.gtpl")
+			fallthrough
+		default:
 			t.Execute(w, b)
-			return
 		}
 		fmt.Println("Beginning Round: ", b.Round)
 		fmt.Println("Cookie value: ", cookie.Value)
 		ticTacTest(w, r, &b)
 	default:
 	}
-
-	t.Execute(w, b)
 }
 
 func main() {
