@@ -4,7 +4,6 @@
     </head>
     <body>
         <p>{{.Board}}</p>
-        <p>"There are too many X's!"</p>
-        <p>"You're cheating!"</p>
+        <p>"You're such an obvious cheat!!!"</p>
     </body>
 </html>

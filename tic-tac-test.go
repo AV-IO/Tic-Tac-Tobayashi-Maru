@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	s "strings"
 	"text/template"
 )
@@ -29,7 +28,7 @@ func boardCheck(w http.ResponseWriter, r *http.Request, board *GameBoard) {
 		//t.Execute(w, board)
 	}
 
-	board.Round++
+	//board.Round++
 }
 
 func checkPlayerWin(board *GameBoard) {
@@ -140,14 +139,20 @@ func game(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &http.Cookie{Name: "Round", Value: "One"})
 		b.Board = "---------"
 		b.Round = 0
-		ticTacTest(w, r, &b)
+		boardCheck(w, r, &b)
+		checkPlayerWin(&b)
+		// Place server moves
+		b.Board = s.Replace(b.Board, "-", "O", 2)
+		checkServerWin(&b)
+		t.Execute(w, b)
+		//ticTacTest(w, r, &b)
 	case "POST":
 		// Populate board
 		r.ParseForm()
 		b.Board = r.Form.Get("String")
-		b.XCount = strings.Count(b.Board, "X")
-		b.OCount = strings.Count(b.Board, "O")
-		// Getting cookie value
+		//b.XCount = strings.Count(b.Board, "X")
+		//b.OCount = strings.Count(b.Board, "O")
+		// Get cookie value and set for next round
 		cookie, _ := r.Cookie("Round")
 		if cookie.Value == "One" {
 			b.Round = 1
@@ -162,16 +167,46 @@ func game(w http.ResponseWriter, r *http.Request) {
 			cookie.Value = "Four"
 			http.SetCookie(w, cookie)
 		}
-		switch {
-		case isCheating(b), boardCheck(b):
-			t, _ = template.ParseFiles("xischeating.gtpl")
+		// Check for proper board
+		boardCheck(w, r, &b)
+		checkPlayerWin(&b)
+		// Place server moves
+		b.Board = s.Replace(b.Board, "-", "O", 2)
+		checkServerWin(&b)
+		// Check if the player is cheating
+		switch b.isCheating {
+		case true:
+			t, _ = template.ParseFiles("ischeating.gtpl")
+			fallthrough
+		case false:
 			fallthrough
 		default:
-			t.Execute(w, b)
+			// do nothing
 		}
-		fmt.Println("Beginning Round: ", b.Round)
-		fmt.Println("Cookie value: ", cookie.Value)
-		ticTacTest(w, r, &b)
+		// Check for server victory
+		switch b.serverVictory {
+		case true:
+			t, _ = template.ParseFiles("servervictory.gtpl")
+			fallthrough
+		case false:
+			fallthrough
+		default:
+			// do nothing
+		}
+		// Check for player victory
+		switch b.playerVictory {
+		case true:
+			t, _ = template.ParseFiles("playervictory.gtpl")
+			fallthrough
+		case false:
+			fallthrough
+		default:
+			// do nothing
+		}
+		t.Execute(w, b)
+		//fmt.Println("Beginning Round: ", b.Round)
+		//fmt.Println("Cookie value: ", cookie.Value)
+		//ticTacTest(w, r, &b)
 	default:
 	}
 }
