@@ -38,26 +38,20 @@ func boardCheck(w http.ResponseWriter, r *http.Request, board *GameBoard) {
 	board.XCount = s.Count(board.Board, "X")
 	board.OCount = s.Count(board.Board, "O")
 
-	// Check for expected number of O's
-	if board.OCount != (2 * board.Round) {
-		board.isCheating = true
-
-		// Check for expected number of X's
-	} else if board.XCount != (board.Round) {
-		board.isCheating = true
-
-		// Check for board size >= 9
-	}
-	for len(board.Board) < 9 {
-		//board.isCheating = true
-		board.Board += "-"
-		// default case
-	}
 	// Check for any characters other than X, O, and -
 	if restrictedCharacters(board.Board) {
 		board.isCheating = true
+		// Check for expected number of O's
+	} else if board.OCount != (2 * board.Round) {
+		board.isCheating = true
+		// Check for expected number of X's
+	} else if board.XCount != (board.Round) {
+		board.isCheating = true
 	}
-
+	// Check for board size >= 9
+	for len(board.Board) < 9 {
+		board.Board += "-"
+	}
 }
 
 func restrictedCharacters(s string) bool {
