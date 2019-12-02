@@ -63,51 +63,25 @@ func restrictedCharacters(s string) bool {
 	return false
 }
 
-func checkPlayerWin(board *GameBoard) {
-	// Check for player victory
-	if board.Board[0] == 'X' && board.Board[1] == 'X' && board.Board[2] == 'X' {
-		board.playerVictory = true
-	} else if board.Board[3] == 'X' && board.Board[4] == 'X' && board.Board[5] == 'X' {
-		board.playerVictory = true
-	} else if board.Board[6] == 'X' && board.Board[7] == 'X' && board.Board[8] == 'X' {
-		board.playerVictory = true
-	} else if board.Board[0] == 'X' && board.Board[3] == 'X' && board.Board[6] == 'X' {
-		board.playerVictory = true
-	} else if board.Board[1] == 'X' && board.Board[4] == 'X' && board.Board[7] == 'X' {
-		board.playerVictory = true
-	} else if board.Board[2] == 'X' && board.Board[5] == 'X' && board.Board[8] == 'X' {
-		board.playerVictory = true
-	} else if board.Board[0] == 'X' && board.Board[4] == 'X' && board.Board[8] == 'X' {
-		board.playerVictory = true
-	} else if board.Board[2] == 'X' && board.Board[4] == 'X' && board.Board[6] == 'X' {
-		board.playerVictory = true
+func checkWin(board *GameBoard, r byte) {
+	var victory *bool
+	if r == 'X' {
+		victory = &board.playerVictory
 	} else {
-		// base case
-		board.playerVictory = false
+		victory = &board.serverVictory
 	}
-}
-
-func checkServerWin(board *GameBoard) {
-	// Check for server victory
-	if board.Board[0] == 'O' && board.Board[1] == 'O' && board.Board[2] == 'O' {
-		board.serverVictory = true
-	} else if board.Board[3] == 'O' && board.Board[4] == 'O' && board.Board[5] == 'O' {
-		board.serverVictory = true
-	} else if board.Board[6] == 'O' && board.Board[7] == 'O' && board.Board[8] == 'O' {
-		board.serverVictory = true
-	} else if board.Board[0] == 'O' && board.Board[3] == 'O' && board.Board[6] == 'O' {
-		board.serverVictory = true
-	} else if board.Board[1] == 'O' && board.Board[4] == 'O' && board.Board[7] == 'O' {
-		board.serverVictory = true
-	} else if board.Board[2] == 'O' && board.Board[5] == 'O' && board.Board[8] == 'O' {
-		board.serverVictory = true
-	} else if board.Board[0] == 'O' && board.Board[4] == 'O' && board.Board[8] == 'O' {
-		board.serverVictory = true
-	} else if board.Board[2] == 'O' && board.Board[4] == 'O' && board.Board[6] == 'O' {
-		board.serverVictory = true
+	// Check for all win conditions
+	if (board.Board[0] == r && board.Board[1] == r && board.Board[2] == r) ||
+		(board.Board[3] == r && board.Board[4] == r && board.Board[5] == r) ||
+		(board.Board[6] == r && board.Board[7] == r && board.Board[8] == r) ||
+		(board.Board[0] == r && board.Board[3] == r && board.Board[6] == r) ||
+		(board.Board[1] == r && board.Board[4] == r && board.Board[7] == r) ||
+		(board.Board[2] == r && board.Board[5] == r && board.Board[8] == r) ||
+		(board.Board[0] == r && board.Board[4] == r && board.Board[8] == r) ||
+		(board.Board[2] == r && board.Board[4] == r && board.Board[6] == r) {
+		*victory = true
 	} else {
-		// base case
-		board.serverVictory = false
+		*victory = false
 	}
 }
 
@@ -160,10 +134,10 @@ func game(w http.ResponseWriter, r *http.Request) {
 		b.Board = "---------"
 		b.Round = 0
 		boardCheck(w, r, &b)
-		checkPlayerWin(&b)
+		checkWin(&b, 'X')
 		// Place server moves
 		b.Board = s.Replace(b.Board, "-", "O", 2)
-		checkServerWin(&b)
+		checkWin(&b, 'O')
 	case "POST":
 		// Populate board
 		r.ParseForm()
@@ -210,10 +184,10 @@ func game(w http.ResponseWriter, r *http.Request) {
 		}
 		// Check for proper board
 		boardCheck(w, r, &b)
-		checkPlayerWin(&b)
+		checkWin(&b, 'X')
 		// Place server moves
 		b.Board = s.Replace(b.Board, "-", "O", 2)
-		checkServerWin(&b)
+		checkWin(&b, 'O')
 		switch {
 		case b.isCheating:
 			t, _ = template.ParseFiles("ischeating.gtpl")
