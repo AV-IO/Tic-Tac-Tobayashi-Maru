@@ -40,14 +40,10 @@ func boardCheck(w http.ResponseWriter, r *http.Request, board *GameBoard) {
 	board.XCount = s.Count(board.Board, "X")
 	board.OCount = s.Count(board.Board, "O")
 
-	// Check for any characters other than X, O, and -
-	if restrictedCharacters(board.Board) {
-		board.isCheating = true
-		// Check for expected number of O's
-	} else if board.OCount != (2 * board.Round) {
-		board.isCheating = true
-		// Check for expected number of X's
-	} else if board.XCount != (board.Round) {
+	if board.Round > 9 ||
+		restrictedCharacters(board.Board) || // Check for any characters other than X, O, and -
+		board.OCount != (2*board.Round) || // Check for expected number of O's
+		board.XCount != (board.Round) { // Check for expected number of X's
 		board.isCheating = true
 	}
 	// Check for board size >= 9
@@ -168,14 +164,6 @@ func game(w http.ResponseWriter, r *http.Request) {
 		t, _ = template.ParseFiles("ischeating.gtpl")
 	}
 	t.Execute(w, b)
-
-	// Cookie Cleanup
-	/*
-		if t.Tree.Name != "game.gtpl" {
-			cookie, _ := r.Cookie("Round")
-			cookie.Value = ""
-			http.SetCookie(w, cookie)
-		}*/
 }
 
 func main() {
