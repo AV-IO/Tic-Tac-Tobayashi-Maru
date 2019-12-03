@@ -6,8 +6,11 @@ import (
 	"log"
 	"net/http"
 	s "strings"
+	"sync"
 	"text/template"
 )
+
+var cmap *sync.Map
 
 // GenerateRandomBytes returns securely generated random bytes.
 // It will return an error if the system's secure random
@@ -20,7 +23,6 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return b, nil
 }
 
@@ -67,7 +69,7 @@ func checkWin(board *GameBoard, r byte) {
 	var victory *bool
 	if r == 'X' {
 		victory = &board.playerVictory
-	} else {
+	} else if r == 'O' {
 		victory = &board.serverVictory
 	}
 	// Check for all win conditions
@@ -106,81 +108,47 @@ func game(w http.ResponseWriter, r *http.Request) {
 		isCheating:    false,
 	}
 	t, _ := template.ParseFiles("game.gtpl")
-	m := make(map[string]string)
 
-	m["1"], _ = GenerateRandomStringURLSafe(16)
-	m["2"], _ = GenerateRandomStringURLSafe(16)
-	m["3"], _ = GenerateRandomStringURLSafe(16)
-	m["4"], _ = GenerateRandomStringURLSafe(16)
-	m["5"], _ = GenerateRandomStringURLSafe(16)
-	m["6"], _ = GenerateRandomStringURLSafe(16)
-	m["7"], _ = GenerateRandomStringURLSafe(16)
-	m["8"], _ = GenerateRandomStringURLSafe(16)
-	m["9"], _ = GenerateRandomStringURLSafe(16)
-
-	r1 := m["1"]
-	r2 := m["2"]
-	r3 := m["3"]
-	r4 := m["4"]
-	r5 := m["5"]
-	r6 := m["6"]
-	r7 := m["7"]
-	r8 := m["8"]
-	r9 := m["9"]
+	NewBoard := func() {
+		v, _ := GenerateRandomStringURLSafe(32)
+		c := &http.Cookie{Name: "SESSION", Value: v}
+		http.SetCookie(w, c)
+		b.Round = 0
+		cmap.Store(c.Value, b.Round)
+		// Place server moves
+		b.Board = s.Replace("---------", "-", "O", 2)
+	}
 
 	switch r.Method {
 	case "GET":
-		http.SetCookie(w, &http.Cookie{Name: "Round", Value: r1})
-		b.Board = "---------"
-		b.Round = 0
-		boardCheck(w, r, &b)
-		checkWin(&b, 'X')
-		// Place server moves
-		b.Board = s.Replace(b.Board, "-", "O", 2)
-		checkWin(&b, 'O')
+		c, err := r.Cookie("SESSION")
+		if err == http.ErrNoCookie {
+			NewBoard()
+		} else {
+			cmap.Store(c.Name, 0)
+		}
 	case "POST":
 		// Populate board
 		r.ParseForm()
 		b.Board = r.Form.Get("String")
-		// Get cookie value and set for next round
-		cookie, _ := r.Cookie("Round")
-		if cookie.Value == r1 {
-			b.Round = 1
-			cookie.Value = r2
-			http.SetCookie(w, cookie)
-		} else if cookie.Value == r2 {
-			b.Round = 2
-			cookie.Value = r3
-			http.SetCookie(w, cookie)
-		} else if cookie.Value == r3 {
-			b.Round = 3
-			cookie.Value = r4
-			http.SetCookie(w, cookie)
-		} else if cookie.Value == r4 {
-			b.Round = 4
-			cookie.Value = r5
-			http.SetCookie(w, cookie)
-		} else if cookie.Value == r5 {
-			b.Round = 5
-			cookie.Value = r6
-			http.SetCookie(w, cookie)
-		} else if cookie.Value == r6 {
-			b.Round = 6
-			cookie.Value = r7
-			http.SetCookie(w, cookie)
-		} else if cookie.Value == r7 {
-			b.Round = 7
-			cookie.Value = r8
-			http.SetCookie(w, cookie)
-		} else if cookie.Value == r8 {
-			b.Round = 8
-			cookie.Value = r9
-			http.SetCookie(w, cookie)
-		} else if cookie.Value == r9 {
-			// Force error to cheaing screen
-			b.Round = 100
-			cookie.Value = r9
-			http.SetCookie(w, cookie)
+		// Get cookie value and increment internal value
+		c, err := r.Cookie("SESSION")
+		if err == http.ErrNoCookie {
+			NewBoard()
+			break
+		} else {
+			roundi, found := cmap.Load(c.Name)
+			if !found {
+				NewBoard()
+				break
+			}
+			switch roundi.(int) {
+			case 9:
+				b.Round = 100
+			default:
+				b.Round = roundi.(int) + 1
+			}
+			cmap.Store(c.Name, b.Round)
 		}
 		// Check for proper board
 		boardCheck(w, r, &b)
