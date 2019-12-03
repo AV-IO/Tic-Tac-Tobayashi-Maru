@@ -103,7 +103,7 @@ func game(w http.ResponseWriter, r *http.Request) {
 		serverVictory: false,
 		isCheating:    false,
 	}
-	t, _ := template.ParseFiles("game.gtpl")
+	t, _ := template.ParseFiles("game.htpl")
 
 	NewBoard := func() {
 		v, _ := GenerateRandomStringURLSafe(32)
@@ -154,14 +154,14 @@ func game(w http.ResponseWriter, r *http.Request) {
 		checkWin(&b, 'O')
 		switch {
 		case b.isCheating:
-			t, _ = template.ParseFiles("ischeating.gtpl")
+			t, _ = template.ParseFiles("ischeating.htpl")
 		case b.playerVictory:
-			t, _ = template.ParseFiles("playervictory.gtpl")
+			t, _ = template.ParseFiles("playervictory.htpl")
 		case b.serverVictory:
-			t, _ = template.ParseFiles("servervictory.gtpl")
+			t, _ = template.ParseFiles("servervictory.htpl")
 		}
 	default:
-		t, _ = template.ParseFiles("ischeating.gtpl")
+		t, _ = template.ParseFiles("ischeating.htpl")
 	}
 	t.Execute(w, b)
 }
