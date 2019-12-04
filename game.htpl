@@ -1,5 +1,16 @@
 {{define "button"}}
-<form action="/" method="POST"><input type="submit" value="Click here to {{.}}!"></form>
+<input type="submit" value="Click here to {{.}}!">
+{{end}}
+{{define "square"}}
+<th>
+    <input
+        name="Board"
+        type="submit"
+        value="{{ReplaceIndexWX (.)}}"
+        src="assets/images/{{if eq (idx (.)) "X"}}enterprise{{else if eq (idx (.)) "O"}}klingon{{else}}space{{end}}.jpg"
+        alt="{{idx (.)}}"
+    />
+</th>
 {{end}}
 
 <html>
@@ -7,6 +18,7 @@
     <title></title>
     </head>
     <body>
+        <form action="/" method="POST">
         {{if .IsCheating}}
             <p>You're Cheating!</p>
             {{template "button" "try again"}}
@@ -21,46 +33,19 @@
             <p>{{.Board}}</p>
             <table>
                 <tr>
-                    <th><img
-                        src="assets/images/{{if eq (index .Board 0) 'X'}}enterprise{{else if eq (index .Board 0) 'O'}}klingon{{else}}space{{end}}.jpg"
-                        alt="{{if eq (index .Board 0) 'X'}}X{{else if eq (index .Board 0) 'O'}}O{{end}}">
-                    </th>
-                    <th><img
-                        src="assets/images/{{if eq (index .Board 1) 'X'}}enterprise{{else if eq (index .Board 1) 'O'}}klingon{{else}}space{{end}}.jpg"
-                        alt="{{if eq (index .Board 1) 'X'}}X{{else if eq (index .Board 1) 'O'}}O{{end}}">
-                    </th>
-                    <th><img
-                        src="assets/images/{{if eq (index .Board 2) 'X'}}enterprise{{else if eq (index .Board 2) 'O'}}klingon{{else}}space{{end}}.jpg"
-                        alt="{{if eq (index .Board 2) 'X'}}X{{else if eq (index .Board 2) 'O'}}O{{end}}">
-                    </th>
+                    {{template "square" combine 0 .Board}}
+                    {{template "square" combine 1 .Board}}
+                    {{template "square" combine 2 .Board}}
                 </tr>
                 <tr>
-                    <th><img
-                        src="assets/images/{{if eq (index .Board 3) 'X'}}enterprise{{else if eq (index .Board 3) 'O'}}klingon{{else}}space{{end}}.jpg"
-                        alt="{{if eq (index .Board 3) 'X'}}X{{else if eq (index .Board 3) 'O'}}O{{end}}">
-                    </th>
-                    <th><img
-                        src="assets/images/{{if eq (index .Board 4) 'X'}}enterprise{{else if eq (index .Board 4) 'O'}}klingon{{else}}space{{end}}.jpg"
-                        alt="{{if eq (index .Board 4) 'X'}}X{{else if eq (index .Board 4) 'O'}}O{{end}}">
-                    </th>
-                    <th><img
-                        src="assets/images/{{if eq (index .Board 5) 'X'}}enterprise{{else if eq (index .Board 5) 'O'}}klingon{{else}}space{{end}}.jpg"
-                        alt="{{if eq (index .Board 5) 'X'}}X{{else if eq (index .Board 5) 'O'}}O{{end}}">
-                    </th>
+                    {{template "square" combine 3 .Board}}
+                    {{template "square" combine 4 .Board}}
+                    {{template "square" combine 5 .Board}}
                 </tr>
                 <tr>
-                    <th><img
-                        src="assets/images/{{if eq (index .Board 6) 'X'}}enterprise{{else if eq (index .Board 6) 'O'}}klingon{{else}}space{{end}}.jpg"
-                        alt="{{if eq (index .Board 6) 'X'}}X{{else if eq (index .Board 6) 'O'}}O{{end}}">
-                    </th>
-                    <th><img
-                        src="assets/images/{{if eq (index .Board 7) 'X'}}enterprise{{else if eq (index .Board 7) 'O'}}klingon{{else}}space{{end}}.jpg"
-                        alt="{{if eq (index .Board 7) 'X'}}X{{else if eq (index .Board 7) 'O'}}O{{end}}">
-                    </th>
-                    <th><img
-                        src="assets/images/{{if eq (index .Board 8) 'X'}}enterprise{{else if eq (index .Board 8) 'O'}}klingon{{else}}space{{end}}.jpg"
-                        alt="{{if eq (index .Board 8) 'X'}}X{{else if eq (index .Board 8) 'O'}}O{{end}}">
-                    </th>
+                    {{template "square" combine 6 .Board}}
+                    {{template "square" combine 7 .Board}}
+                    {{template "square" combine 8 .Board}}
                 </tr>
             </table>
         {{else}}
@@ -68,9 +53,6 @@
             {{template "button" "play the game"}}
         {{end}}
         <p>"Enter a string to send!"</p>
-        <form action="/game" method="post">
-            String:<input type="text" name="String">
-            <input type="submit" value="String">
         </form>
     </body>
 </html>

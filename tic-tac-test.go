@@ -97,7 +97,18 @@ func game(w http.ResponseWriter, r *http.Request) {
 	b := GameBoard{
 		Board: "---------",
 	}
-	t, err := template.ParseFiles("game.htpl")
+	fm := template.FuncMap{
+		"combine": func(i int, s string) string {
+			return string(rune(i)) + s
+		},
+		"ReplaceIndexWX": func(s string) string {
+			return s[1:int(s[0])+1] + "X" + s[int(s[0])+2:]
+		},
+		"idx": func(s string) string {
+			return string(s[int(s[0])])
+		},
+	}
+	t, err := template.New("game.htpl").Funcs(fm).ParseFiles("game.htpl")
 	if err != nil {
 		panic(err)
 	}
@@ -127,7 +138,7 @@ func game(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		b.Board = r.Form.Get("String")
+		b.Board = r.Form.Get("Board")
 		if b.Board == "" {
 			NewBoard()
 			break
@@ -157,6 +168,9 @@ func game(w http.ResponseWriter, r *http.Request) {
 		// Place server moves
 		b.Board = s.Replace(b.Board, "-", "O", 2)
 		checkWin(&b, 'O')
+		if b.IsCheating || b.PlayerVictory || b.ServerVictory {
+			cmap.Store(c.Name, 0)
+		}
 	default:
 		b.IsCheating = true
 	}
