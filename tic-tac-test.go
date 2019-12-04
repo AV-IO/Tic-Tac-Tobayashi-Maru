@@ -105,7 +105,7 @@ func game(w http.ResponseWriter, r *http.Request) {
 			return s[1:int(s[0])+1] + "X" + s[int(s[0])+2:]
 		},
 		"idx": func(s string) string {
-			return string(s[int(s[0])])
+			return string(s[int(s[0])+1])
 		},
 	}
 	t, err := template.New("game.htpl").Funcs(fm).ParseFiles("game.htpl")
