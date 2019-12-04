@@ -1,9 +1,72 @@
+{{define "button"}}
+<form action="/" method="POST"><input type="submit" value="Click here to {{.}}!"></form>
+{{end}}
+
 <html>
     <head>
     <title></title>
     </head>
     <body>
-        <p>{{.Board}}</p>
+        {{if .IsCheating}}
+            <p>You're Cheating!</p>
+            {{template "button" "try again"}}
+        {{else if .PlayerVictory}}
+            <p>You Win!</p>
+            <p>flag{BeatingTheImpossibleGame}</p>
+            {{template "button" "play again"}}
+        {{else if .ServerVictory}}
+            <p>Server Wins!</p>
+            {{template "button" "try again"}}
+        {{else if .IsPlaying}}
+            <p>{{.Board}}</p>
+            <table>
+                <tr>
+                    <th><img
+                        src="assets/images/{{if eq (index .Board 0) 'X'}}enterprise{{else if eq (index .Board 0) 'O'}}klingon{{else}}space{{end}}.jpg"
+                        alt="{{if eq (index .Board 0) 'X'}}X{{else if eq (index .Board 0) 'O'}}O{{end}}">
+                    </th>
+                    <th><img
+                        src="assets/images/{{if eq (index .Board 1) 'X'}}enterprise{{else if eq (index .Board 1) 'O'}}klingon{{else}}space{{end}}.jpg"
+                        alt="{{if eq (index .Board 1) 'X'}}X{{else if eq (index .Board 1) 'O'}}O{{end}}">
+                    </th>
+                    <th><img
+                        src="assets/images/{{if eq (index .Board 2) 'X'}}enterprise{{else if eq (index .Board 2) 'O'}}klingon{{else}}space{{end}}.jpg"
+                        alt="{{if eq (index .Board 2) 'X'}}X{{else if eq (index .Board 2) 'O'}}O{{end}}">
+                    </th>
+                </tr>
+                <tr>
+                    <th><img
+                        src="assets/images/{{if eq (index .Board 3) 'X'}}enterprise{{else if eq (index .Board 3) 'O'}}klingon{{else}}space{{end}}.jpg"
+                        alt="{{if eq (index .Board 3) 'X'}}X{{else if eq (index .Board 3) 'O'}}O{{end}}">
+                    </th>
+                    <th><img
+                        src="assets/images/{{if eq (index .Board 4) 'X'}}enterprise{{else if eq (index .Board 4) 'O'}}klingon{{else}}space{{end}}.jpg"
+                        alt="{{if eq (index .Board 4) 'X'}}X{{else if eq (index .Board 4) 'O'}}O{{end}}">
+                    </th>
+                    <th><img
+                        src="assets/images/{{if eq (index .Board 5) 'X'}}enterprise{{else if eq (index .Board 5) 'O'}}klingon{{else}}space{{end}}.jpg"
+                        alt="{{if eq (index .Board 5) 'X'}}X{{else if eq (index .Board 5) 'O'}}O{{end}}">
+                    </th>
+                </tr>
+                <tr>
+                    <th><img
+                        src="assets/images/{{if eq (index .Board 6) 'X'}}enterprise{{else if eq (index .Board 6) 'O'}}klingon{{else}}space{{end}}.jpg"
+                        alt="{{if eq (index .Board 6) 'X'}}X{{else if eq (index .Board 6) 'O'}}O{{end}}">
+                    </th>
+                    <th><img
+                        src="assets/images/{{if eq (index .Board 7) 'X'}}enterprise{{else if eq (index .Board 7) 'O'}}klingon{{else}}space{{end}}.jpg"
+                        alt="{{if eq (index .Board 7) 'X'}}X{{else if eq (index .Board 7) 'O'}}O{{end}}">
+                    </th>
+                    <th><img
+                        src="assets/images/{{if eq (index .Board 8) 'X'}}enterprise{{else if eq (index .Board 8) 'O'}}klingon{{else}}space{{end}}.jpg"
+                        alt="{{if eq (index .Board 8) 'X'}}X{{else if eq (index .Board 8) 'O'}}O{{end}}">
+                    </th>
+                </tr>
+            </table>
+        {{else}}
+            <p>Welcome to the game!</p>
+            {{template "button" "play the game"}}
+        {{end}}
         <p>"Enter a string to send!"</p>
         <form action="/game" method="post">
             String:<input type="text" name="String">

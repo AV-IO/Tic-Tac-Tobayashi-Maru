@@ -3,12 +3,22 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"log"
+	"html/template"
 	"net/http"
 	s "strings"
 	"sync"
-	"text/template"
 )
+
+type GameBoard struct {
+	Board         string
+	Round         int
+	XCount        int
+	OCount        int
+	PlayerVictory bool
+	ServerVictory bool
+	IsCheating    bool
+	IsPlaying     bool
+}
 
 var cmap *sync.Map
 
@@ -44,7 +54,7 @@ func boardCheck(w http.ResponseWriter, r *http.Request, board *GameBoard) {
 		restrictedCharacters(board.Board) || // Check for any characters other than X, O, and -
 		board.OCount != (2*board.Round) || // Check for expected number of O's
 		board.XCount != (board.Round) { // Check for expected number of X's
-		board.isCheating = true
+		board.IsCheating = true
 	}
 	// Check for board size >= 9
 	for len(board.Board) < 9 {
@@ -64,9 +74,9 @@ func restrictedCharacters(s string) bool {
 func checkWin(board *GameBoard, r byte) {
 	var victory *bool
 	if r == 'X' {
-		victory = &board.playerVictory
+		victory = &board.PlayerVictory
 	} else if r == 'O' {
-		victory = &board.serverVictory
+		victory = &board.ServerVictory
 	}
 	// Check for all win conditions
 	if (board.Board[0] == r && board.Board[1] == r && board.Board[2] == r) ||
@@ -83,27 +93,14 @@ func checkWin(board *GameBoard, r byte) {
 	}
 }
 
-type GameBoard struct {
-	Board         string
-	Round         int
-	XCount        int
-	OCount        int
-	playerVictory bool
-	serverVictory bool
-	isCheating    bool
-}
-
 func game(w http.ResponseWriter, r *http.Request) {
 	b := GameBoard{
-		Board:         "---------",
-		Round:         0,
-		XCount:        0,
-		OCount:        0,
-		playerVictory: false,
-		serverVictory: false,
-		isCheating:    false,
+		Board: "---------",
 	}
-	t, _ := template.ParseFiles("game.htpl")
+	t, err := template.ParseFiles("game.htpl")
+	if err != nil {
+		panic(err)
+	}
 
 	NewBoard := func() {
 		v, _ := GenerateRandomStringURLSafe(32)
@@ -124,9 +121,17 @@ func game(w http.ResponseWriter, r *http.Request) {
 			cmap.Store(c.Name, 0)
 		}
 	case "POST":
+		b.IsPlaying = true
 		// Populate board
-		r.ParseForm()
+		err = r.ParseForm()
+		if err != nil {
+			panic(err)
+		}
 		b.Board = r.Form.Get("String")
+		if b.Board == "" {
+			NewBoard()
+			break
+		}
 		// Get cookie value and increment internal value
 		c, err := r.Cookie("SESSION")
 		if err == http.ErrNoCookie {
@@ -152,18 +157,13 @@ func game(w http.ResponseWriter, r *http.Request) {
 		// Place server moves
 		b.Board = s.Replace(b.Board, "-", "O", 2)
 		checkWin(&b, 'O')
-		switch {
-		case b.isCheating:
-			t, _ = template.ParseFiles("ischeating.htpl")
-		case b.playerVictory:
-			t, _ = template.ParseFiles("playervictory.htpl")
-		case b.serverVictory:
-			t, _ = template.ParseFiles("servervictory.htpl")
-		}
 	default:
-		t, _ = template.ParseFiles("ischeating.htpl")
+		b.IsCheating = true
 	}
-	t.Execute(w, b)
+	err = t.Execute(w, b)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
@@ -176,6 +176,6 @@ func main() {
 
 	err := http.ListenAndServe(":9090", nil) // setting listening port
 	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		panic(err)
 	}
 }
