@@ -167,7 +167,12 @@ func game(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/game", game)
+	cmap = new(sync.Map)
+	// Static file handling
+	fs := http.FileServer(http.Dir("assets"))
+	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
+	// Template handling
+	http.HandleFunc("/", game)
 
 	err := http.ListenAndServe(":9090", nil) // setting listening port
 	if err != nil {
