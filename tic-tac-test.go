@@ -41,12 +41,12 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 // It will return an error if the system's secure random
 // number generator fails to function correctly, in which
 // case the caller should not continue.
-func GenerateRandomStringURLSafe(n int) (string, error) {
-	b, err := GenerateRandomBytes(n)
-	return base64.URLEncoding.EncodeToString(b), err
+func GenerateRandomStringURLSafe(n int) string {
+	b, _ := GenerateRandomBytes(n)
+	return base64.URLEncoding.EncodeToString(b)
 }
 
-func boardCheck(w http.ResponseWriter, r *http.Request, board *GameBoard) {
+func boardCheck(board *GameBoard) {
 	board.XCount = s.Count(board.Board, "X")
 	board.OCount = s.Count(board.Board, "O")
 
@@ -113,11 +113,10 @@ func game(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	NewBoard := func() {
-		v, _ := GenerateRandomStringURLSafe(32)
-		c := &http.Cookie{Name: "SESSION", Value: v}
+	NewBoard := func(cVal string, round int) {
+		c := &http.Cookie{Name: "SESSION", Value: cVal}
 		http.SetCookie(w, c)
-		b.Round = 0
+		b.Round = round
 		cmap.Store(c.Value, b.Round)
 		// Place server moves
 		b.Board = s.Replace("---------", "-", "O", 2)
@@ -127,9 +126,9 @@ func game(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		c, err := r.Cookie("SESSION")
 		if err == http.ErrNoCookie {
-			NewBoard()
+			NewBoard(GenerateRandomStringURLSafe(32), 0)
 		} else {
-			cmap.Store(c.Name, 0)
+			cmap.Store(c.Value, 0)
 		}
 	case "POST":
 		b.IsPlaying = true
@@ -138,20 +137,14 @@ func game(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		b.Board = r.Form.Get("Board")
-		if b.Board == "" {
-			NewBoard()
-			break
-		}
-		// Get cookie value and increment internal value
 		c, err := r.Cookie("SESSION")
 		if err == http.ErrNoCookie {
-			NewBoard()
+			NewBoard(GenerateRandomStringURLSafe(32), 0)
 			break
 		} else {
-			roundi, found := cmap.Load(c.Name)
+			roundi, found := cmap.Load(c.Value)
 			if !found {
-				NewBoard()
+				NewBoard(c.Value, 0)
 				break
 			}
 			switch roundi.(int) {
@@ -160,16 +153,22 @@ func game(w http.ResponseWriter, r *http.Request) {
 			default:
 				b.Round = roundi.(int) + 1
 			}
-			cmap.Store(c.Name, b.Round)
+			cmap.Store(c.Value, b.Round)
 		}
+		b.Board = r.Form.Get("Board")
+		if b.Board == "" {
+			NewBoard(c.Value, 0)
+			break
+		}
+		// Get cookie value and increment internal value
 		// Check for proper board
-		boardCheck(w, r, &b)
+		boardCheck(&b)
 		checkWin(&b, 'X')
 		// Place server moves
 		b.Board = s.Replace(b.Board, "-", "O", 2)
 		checkWin(&b, 'O')
 		if b.IsCheating || b.PlayerVictory || b.ServerVictory {
-			cmap.Store(c.Name, 0)
+			cmap.Store(c.Value, 0)
 		}
 	default:
 		b.IsCheating = true

@@ -21,7 +21,7 @@
     </head>
     <body>
         {{if .IsCheating}}
-            <p>You're Cheating!</p>
+            <p>You're Cheating! We count all of your X's and O's!</p>
             {{template "button" "try again"}}
         {{else if .IsPlaying}}
             {{if .PlayerVictory}}
