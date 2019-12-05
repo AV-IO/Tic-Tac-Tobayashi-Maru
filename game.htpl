@@ -14,45 +14,75 @@
         </form>
     {{end}}
 {{end}}
-
+<!DOCTYPE HTML>
+<!--
+	Aerial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
 <html>
-    <head>
-    <title></title>
-    </head>
-    <body>
-        {{if .IsCheating}}
-            <p>You're Cheating! We count all of your X's and O's!</p>
-            {{template "button" "try again"}}
-        {{else if .IsPlaying}}
-            {{if .PlayerVictory}}
-                <p>You Win! flag{BeatingTheImpossibleGame}</p>
-                {{template "button" "play again"}}
-            {{else if .ServerVictory}}
-                <p>Server Wins!</p>
-                {{template "button" "try again"}}
-            {{else}}
-            <br><br>
-            {{end}}
-            <table>
-                <tr>
-                    <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 0 .Board}}{{else}}{{template "finalsquare" combine 0 .Board}}{{end}}</th>
-                    <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 1 .Board}}{{else}}{{template "finalsquare" combine 1 .Board}}{{end}}</th>
-                    <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 2 .Board}}{{else}}{{template "finalsquare" combine 2 .Board}}{{end}}</th>
-                </tr>
-                <tr>
-                    <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 3 .Board}}{{else}}{{template "finalsquare" combine 3 .Board}}{{end}}</th>
-                    <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 4 .Board}}{{else}}{{template "finalsquare" combine 4 .Board}}{{end}}</th>
-                    <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 5 .Board}}{{else}}{{template "finalsquare" combine 5 .Board}}{{end}}</th>
-                </tr>
-                <tr>
-                    <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 6 .Board}}{{else}}{{template "finalsquare" combine 6 .Board}}{{end}}</th>
-                    <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 7 .Board}}{{else}}{{template "finalsquare" combine 7 .Board}}{{end}}</th>
-                    <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 8 .Board}}{{else}}{{template "finalsquare" combine 8 .Board}}{{end}}</th>
-                </tr>
-            </table>
-        {{else}}
-            <p>Welcome to the game!</p>
-            {{template "button" "play the game"}}
-        {{end}}
+	<head>
+		<title>Tic-Tac-Tobayashi Maru</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+		<div id="wrapper">
+			<div id="bg"></div>
+			<div id="overlay"></div>
+			<div id="main">
+            <!-- Header -->
+            <header id="header">
+                <h1>Tic-Tac-Tobayashi Maru</h1>
+                <p>You are about to enter the Klingon Neutral Zone...</p> 
+                <!-- Game Board -->
+                {{if .IsCheating}}
+                    <p>You're Cheating! We count all of your X's and O's!</p>
+                    {{template "button" "try again"}}
+                {{else if .IsPlaying}}
+                    {{if .PlayerVictory}}
+                        <p>You Win! flag{BeatingTheImpossibleGame}</p>
+                        {{template "button" "play again"}}
+                    {{else if .ServerVictory}}
+                        <p>Server Wins!</p>
+                        {{template "button" "try again"}}
+                    {{else}}
+                    <br><br><br>
+                    {{end}}
+                    <table>
+                        <tr>
+                            <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 0 .Board}}{{else}}{{template "finalsquare" combine 0 .Board}}{{end}}</th>
+                            <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 1 .Board}}{{else}}{{template "finalsquare" combine 1 .Board}}{{end}}</th>
+                            <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 2 .Board}}{{else}}{{template "finalsquare" combine 2 .Board}}{{end}}</th>
+                        </tr>
+                        <tr>
+                            <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 3 .Board}}{{else}}{{template "finalsquare" combine 3 .Board}}{{end}}</th>
+                            <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 4 .Board}}{{else}}{{template "finalsquare" combine 4 .Board}}{{end}}</th>
+                            <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 5 .Board}}{{else}}{{template "finalsquare" combine 5 .Board}}{{end}}</th>
+                        </tr>
+                        <tr>
+                            <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 6 .Board}}{{else}}{{template "finalsquare" combine 6 .Board}}{{end}}</th>
+                            <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 7 .Board}}{{else}}{{template "finalsquare" combine 7 .Board}}{{end}}</th>
+                            <th>{{if not (or .PlayerVictory .ServerVictory)}}{{template "square" combine 8 .Board}}{{else}}{{template "finalsquare" combine 8 .Board}}{{end}}</th>
+                        </tr>
+                    </table>
+                {{else}}
+                    <p>Welcome to the game!</p>
+                    {{template "button" "play the game"}}
+                {{end}}
+            </header>
+            <!-- Footer -->
+            <footer id="footer">
+                <span class="copyright">&copy; Savage Submarine. Design: <a href="http://html5up.net">HTML5 UP</a>.</span>
+            </footer>
+        </div>
+        </div>
+        <script>
+            window.onload = function() { document.body.classList.remove('is-preload'); }
+            window.ontouchmove = function() { return false; }
+            window.onorientationchange = function() { document.body.scrollTop = 0; }
+        </script>
     </body>
 </html>
