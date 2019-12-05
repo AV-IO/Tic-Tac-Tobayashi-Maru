@@ -56,8 +56,8 @@ func boardCheck(board *GameBoard) {
 		board.XCount != (board.Round) { // Check for expected number of X's
 		board.IsCheating = true
 	}
-	// Check for board size >= 9
-	for len(board.Board) < 9 {
+	// Check for board size > 9
+	for len(board.Board) <= 9 {
 		board.Board += "-"
 	}
 }
